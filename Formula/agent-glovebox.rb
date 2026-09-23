@@ -5,8 +5,8 @@
 class AgentGlovebox < Formula
   desc "Hardware-isolated, allowlist-firewalled sandbox for running Claude Code"
   homepage "https://github.com/AlexanderMattTurner/agent-glovebox"
-  url "https://github.com/AlexanderMattTurner/agent-glovebox/archive/refs/tags/v0.68.0.tar.gz"
-  sha256 "d702737db1fe0f305adccbab89663e59ba53fd64f9a49598417c3d036e5f0714"
+  url "https://github.com/AlexanderMattTurner/agent-glovebox/archive/refs/tags/v0.69.0.tar.gz"
+  sha256 "006fec19039f9400485192af1fba304266f020eb5a868a7b41d4a7859b40f004"
   license "Apache-2.0"
 
   # Owner this release was cut from. Synced from config/packaging.json by
@@ -33,9 +33,9 @@ class AgentGlovebox < Formula
     prune.each { |pattern| rm_rf Dir[pattern] }
     libexec.install (Dir["*"] + Dir[".[!.]*"])
 
-    # Only the two entry points go on PATH; `glovebox` dispatches to its
-    # bin/subcommands/ scripts from within libexec/bin.
-    %w[glovebox claude-github-app].each do |w|
+    # Only setup.bash's wrappers go on PATH; `glovebox` dispatches to its
+    # bin/subcommands/ scripts and bin/glovebox-gh-app from within libexec/bin.
+    %w[glovebox].each do |w|
       bin.install_symlink libexec/"bin"/w
     end
 
@@ -44,11 +44,7 @@ class AgentGlovebox < Formula
 
     # No `claude` symlink: taking that command breaks VS Code and every script that
     # shells out to it, so a Homebrew install leaves the user's own Claude Code alone
-    # and the sandbox is reached by typing `glovebox` or `claude-glovebox`.
-
-    # The name that reaches the sandbox whatever `claude` points at, so instructions written
-    # for a source install ("run claude-glovebox") work on a Homebrew one too.
-    bin.install_symlink libexec/"bin"/"glovebox" => "claude-glovebox"
+    # and the sandbox is reached by typing `glovebox`.
 
     bash_completion.install_symlink libexec/"completions/glovebox.bash" => "glovebox"
     zsh_completion.install_symlink libexec/"completions/glovebox.zsh" => "_glovebox"
@@ -64,9 +60,9 @@ class AgentGlovebox < Formula
 
   def caveats
     <<~EOS
-      `glovebox` and `claude-glovebox` are now on your PATH — either one starts a
-      guarded session. Your own `claude` is left exactly as it was, so VS Code and
-      any script that calls it keep working.
+      `glovebox` is now on your PATH — it starts a guarded session. Your own
+      `claude` is left exactly as it was, so VS Code and any script that calls it
+      keep working.
 
       Finish setup by running: glovebox setup
     EOS
